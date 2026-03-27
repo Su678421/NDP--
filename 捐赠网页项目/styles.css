@@ -1,0 +1,1972 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f9f9f9;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 头部样式 */
+header {
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-e {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    transform: rotate(45deg);
+}
+
+.logo-e::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    transform: rotate(-45deg);
+}
+
+.logo h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.logo p {
+    font-size: 14px;
+    color: #666;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+    align-items: center;
+}
+
+nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #ff7e5f;
+}
+
+.login-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    border-radius: 50px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.login-btn:hover {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,126,95,0.4);
+}
+
+/* 用户信息区域 */
+#user-area {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 50px;
+    background-color: #f9f9f9;
+    transition: all 0.3s;
+    position: relative;
+}
+
+#user-info:hover {
+    background-color: #f0f0f0;
+}
+
+#user-info:hover .user-dropdown {
+    display: block;
+}
+
+.user-avatar-small {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#user-name {
+    font-weight: bold;
+    color: #333;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    padding: 10px;
+    min-width: 150px;
+    display: none;
+    z-index: 1000;
+    margin-top: 10px;
+}
+
+#user-info:hover .user-dropdown {
+    display: block;
+}
+
+.user-dropdown a {
+    display: block;
+    padding: 10px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.user-dropdown a:hover {
+    background-color: #f9f9f9;
+}
+
+/* 聊天模态框 */
+.chat-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.chat-modal-content {
+    background-color: #fff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-modal-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-modal-header h3 {
+    margin: 0;
+}
+
+.chat-modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+}
+
+.message {
+    margin-bottom: 15px;
+    max-width: 80%;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.message.sent {
+    background-color: #fff;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.message.received {
+    background-color: #fff3f0;
+    align-self: flex-start;
+}
+
+.message-time {
+    font-size: 12px;
+    color: #999;
+    text-align: right;
+    margin-top: 5px;
+}
+
+.chat-input-area {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    font-size: 16px;
+}
+
+.chat-send-btn {
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.chat-send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,126,95,0.4);
+}
+
+/* 英雄区域 */
+.hero {
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: white;
+    padding: 150px 0 100px;
+    text-align: center;
+    margin-top: 90px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 800px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.hero-hearts {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.heart {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(45deg);
+    animation: float 6s ease-in-out infinite;
+}
+
+.heart::before,
+.heart::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    border-radius: 50%;
+}
+
+.heart::before {
+    top: -50%;
+    left: 0;
+}
+
+.heart::after {
+    top: 0;
+    left: -50%;
+}
+
+.heart-1 {
+    width: 30px;
+    height: 30px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.heart-2 {
+    width: 20px;
+    height: 20px;
+    top: 60%;
+    left: 85%;
+    animation-delay: 1s;
+}
+
+.heart-3 {
+    width: 25px;
+    height: 25px;
+    top: 40%;
+    left: 5%;
+    animation-delay: 2s;
+}
+
+.heart-4 {
+    width: 15px;
+    height: 15px;
+    top: 80%;
+    left: 90%;
+    animation-delay: 3s;
+}
+
+.heart-5 {
+    width: 35px;
+    height: 35px;
+    top: 30%;
+    left: 95%;
+    animation-delay: 4s;
+}
+
+.heart-6 {
+    width: 20px;
+    height: 20px;
+    top: 10%;
+    left: 50%;
+    animation-delay: 0.5s;
+}
+
+.heart-7 {
+    width: 25px;
+    height: 25px;
+    top: 70%;
+    left: 20%;
+    animation-delay: 1.5s;
+}
+
+.heart-8 {
+    width: 15px;
+    height: 15px;
+    top: 50%;
+    left: 70%;
+    animation-delay: 2.5s;
+}
+
+.heart-9 {
+    width: 30px;
+    height: 30px;
+    top: 90%;
+    left: 40%;
+    animation-delay: 3.5s;
+}
+
+.heart-10 {
+    width: 22px;
+    height: 22px;
+    top: 60%;
+    left: 30%;
+    animation-delay: 4.5s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: rotate(45deg) translateY(0px);
+    }
+    50% {
+        transform: rotate(45deg) translateY(-20px);
+    }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 3;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero h2 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    position: relative;
+    display: inline-block;
+}
+
+.hero h2::before,
+.hero h2::after {
+    content: '❤';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.hero h2::before {
+    left: -50px;
+}
+
+.hero h2::after {
+    right: -50px;
+}
+
+.hero p {
+    font-size: 18px;
+    margin-bottom: 40px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: #fff;
+    color: #ff7e5f;
+    padding: 15px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+    margin: 0 10px;
+    position: relative;
+    z-index: 3;
+}
+
+.btn-primary:hover {
+    background-color: #ff7e5f;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,126,95,0.4);
+}
+
+.btn-secondary {
+    display: inline-block;
+    background-color: transparent;
+    color: #fff;
+    padding: 15px 30px;
+    border: 2px solid #fff;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+    margin: 0 10px;
+    position: relative;
+    z-index: 3;
+}
+
+.btn-secondary:hover {
+    background-color: #fff;
+    color: #ff7e5f;
+    transform: translateY(-2px);
+}
+
+/* 关于我们 */
+.about {
+    padding: 100px 0;
+    background-color: #fff;
+}
+
+.about h2 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 60px;
+    color: #333;
+}
+
+.about-content {
+    display: flex;
+    gap: 60px;
+    align-items: center;
+}
+
+.about-text {
+    flex: 1;
+}
+
+.about-text h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #ff7e5f;
+}
+
+.about-text p {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.about-features {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+}
+
+.feature {
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.feature:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.feature h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.feature p {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 捐赠部分 */
+.donate {
+    padding: 100px 0;
+    background-color: #f9f9f9;
+}
+
+.donate h2 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 60px;
+    color: #333;
+}
+
+.beneficiary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.beneficiary-item {
+    display: flex;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.beneficiary-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.beneficiary-image {
+    width: 300px;
+    height: 400px;
+    overflow: hidden;
+}
+
+.beneficiary-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.beneficiary-item:hover .beneficiary-image img {
+    transform: scale(1.05);
+}
+
+.beneficiary-info {
+    flex: 1;
+    padding: 40px;
+    position: relative;
+}
+
+.beneficiary-info h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.beneficiary-need {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #ff7e5f;
+    font-weight: bold;
+}
+
+.beneficiary-desc {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 30px;
+    color: #666;
+}
+
+.beneficiary-contact {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    color: #666;
+}
+
+.donate-btn {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    padding: 12px 24px;
+    background-color: #4CAF50;
+    color: #fff;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.donate-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76,175,80,0.4);
+}
+
+/* 受赠者详情页面 */
+.beneficiary-detail {
+    padding: 120px 0 100px;
+    background-color: #f9f9f9;
+}
+
+.beneficiary-detail .container {
+    background-color: #fff;
+    padding: 60px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.beneficiary-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.beneficiary-account {
+    flex: 1;
+}
+
+.beneficiary-account h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.beneficiary-account p {
+    color: #666;
+}
+
+.beneficiary-contact-info {
+    margin-left: 40px;
+    text-align: right;
+}
+
+.beneficiary-contact-info a {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.beneficiary-contact-info a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,126,95,0.4);
+}
+
+.beneficiary-detail-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.beneficiary-tab-btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    background-color: #f9f9f9;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.beneficiary-tab-btn.active {
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+}
+
+.beneficiary-tab-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.beneficiary-tab-content {
+    display: none;
+}
+
+.beneficiary-tab-content.active {
+    display: block;
+}
+
+.beneficiary-detail-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.beneficiary-detail-form .form-group {
+    margin-bottom: 30px;
+}
+
+.beneficiary-detail-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.beneficiary-detail-form input,
+.beneficiary-detail-form textarea,
+.beneficiary-detail-form select {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+.beneficiary-detail-form textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.beneficiary-detail-desc {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid #eee;
+}
+
+.beneficiary-detail-desc h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.beneficiary-detail-desc p {
+    line-height: 1.8;
+    color: #666;
+}
+
+/* 发票和证书模态框 */
+.invoice-certificate-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.invoice-certificate-content {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.invoice-certificate-content h3 {
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: #ff7e5f;
+}
+
+.invoice-certificate-options {
+    margin-bottom: 40px;
+}
+
+.invoice-certificate-options label {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+.invoice-certificate-options input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+/* 登录/注册模态框 */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.auth-modal-content {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.auth-modal-content h3 {
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: #ff7e5f;
+    text-align: center;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.auth-form input {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+.auth-form button {
+    padding: 15px;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.auth-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,126,95,0.4);
+}
+
+.auth-form p {
+    text-align: center;
+    color: #666;
+}
+
+.auth-form a {
+    color: #ff7e5f;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.auth-form a:hover {
+    text-decoration: underline;
+}
+
+/* 角色选择模态框 */
+.role-select-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.role-select-content {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.role-select-content h3 {
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.role-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.role-btn {
+    padding: 20px;
+    border: 2px solid #ff7e5f;
+    border-radius: 10px;
+    background-color: #fff;
+    color: #ff7e5f;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.role-btn:hover {
+    background-color: #ff7e5f;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,126,95,0.4);
+}
+
+/* 个人主页 */
+.user-profile {
+    padding: 120px 0 100px;
+    background-color: #f9f9f9;
+}
+
+.user-profile .container {
+    background-color: #fff;
+    padding: 60px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.user-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    font-weight: bold;
+    margin: 0 auto 30px;
+}
+
+.user-name {
+    font-size: 24px;
+    margin-bottom: 40px;
+    color: #333;
+}
+
+.user-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.user-action-btn {
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.user-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,126,95,0.4);
+}
+
+.donate-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.tab-btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    background-color: #fff;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.tab-btn.active {
+    background-color: #ff7e5f;
+    color: #fff;
+}
+
+.tab-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.tab-content {
+    display: none;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 30px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.amount-options {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.amount-btn {
+    padding: 12px 24px;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.amount-btn:hover {
+    border-color: #ff7e5f;
+    color: #ff7e5f;
+}
+
+#custom-amount {
+    padding: 12px 20px;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    width: 200px;
+}
+
+.donate-type {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.donate-type input[type="radio"] {
+    margin-right: 8px;
+}
+
+.payment-options {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.payment-btn {
+    padding: 12px 24px;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.payment-btn:hover {
+    border-color: #ff7e5f;
+    color: #ff7e5f;
+}
+
+.form-group input[type="checkbox"] {
+    margin-right: 8px;
+    margin-left: 20px;
+}
+
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+/* 项目部分 */
+.projects {
+    padding: 100px 0;
+    background-color: #fff;
+}
+
+.projects h2 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 60px;
+    color: #333;
+}
+
+.project-categories {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.category-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 50px;
+    background-color: #f9f9f9;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.category-btn.active {
+    background-color: #ff7e5f;
+    color: #fff;
+}
+
+.category-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.project-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.project-item {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+.project-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.project-info {
+    padding: 30px;
+}
+
+.project-info h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.project-info p {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.project-progress {
+    margin-bottom: 20px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff7e5f, #feb47b);
+    border-radius: 5px;
+    transition: width 1s ease;
+}
+
+.project-progress span {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ff7e5f;
+}
+
+/* 常见问题 */
+.faq {
+    padding: 100px 0;
+    background-color: #f9f9f9;
+}
+
+.faq h2 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 60px;
+    color: #333;
+}
+
+.faq-list {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    margin-bottom: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.faq-question {
+    padding: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.faq-question:hover {
+    background-color: #f0f0f0;
+}
+
+.faq-question::after {
+    content: '+';
+    font-size: 24px;
+    transition: transform 0.3s;
+}
+
+.faq-item.active .faq-question::after {
+    transform: rotate(45deg);
+}
+
+.faq-answer {
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.faq-item.active .faq-answer {
+    padding: 20px;
+    max-height: 200px;
+}
+
+.faq-answer p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #666;
+}
+
+/* 聊天功能 */
+.chat {
+    padding: 100px 0;
+    background-color: #f9f9f9;
+}
+
+.chat h2 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.chat-description {
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 60px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chat-container {
+    display: flex;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 600px;
+}
+
+.chat-sidebar {
+    width: 350px;
+    border-right: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-sidebar h3 {
+    padding: 20px;
+    margin: 0;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.chat-item {
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chat-item:hover {
+    background-color: #f9f9f9;
+}
+
+.chat-item.active {
+    background-color: #fff3f0;
+    border-left: 4px solid #ff7e5f;
+}
+
+.chat-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.chat-info {
+    flex: 1;
+}
+
+.chat-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.chat-info p {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-info span {
+    font-size: 12px;
+    color: #999;
+}
+
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.chat-status {
+    font-size: 14px;
+    color: #4CAF50;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.chat-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #4CAF50;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+}
+
+.message {
+    margin-bottom: 20px;
+    max-width: 70%;
+}
+
+.message.received {
+    align-self: flex-start;
+}
+
+.message.sent {
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.message-content {
+    padding: 15px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.message.received .message-content {
+    background-color: #fff;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.message.sent .message-content {
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: #fff;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 2px 5px rgba(255,126,95,0.2);
+}
+
+.message-time {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+    text-align: right;
+}
+
+.message.received .message-time {
+    text-align: left;
+}
+
+.chat-input {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    background-color: #fff;
+}
+
+.chat-input textarea {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    resize: none;
+    min-height: 80px;
+    max-height: 150px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.chat-input button {
+    padding: 12px 24px;
+    height: fit-content;
+}
+
+/* 联系我们 */
+.contact {
+    padding: 100px 0;
+    background-color: #fff;
+}
+
+.contact h2 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 60px;
+    color: #333;
+}
+
+.contact-info {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 60px;
+}
+
+.contact-item {
+    text-align: center;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    flex: 1;
+    margin: 0 15px;
+}
+
+.contact-item h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.contact-item p {
+    font-size: 16px;
+    color: #666;
+}
+
+.contact-form {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    padding: 40px;
+    border-radius: 10px;
+}
+
+.contact-form h3 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 40px;
+    color: #333;
+}
+
+.contact-form .form-group {
+    display: flex;
+    gap: 20px;
+}
+
+.contact-form .form-group input {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+.contact-form textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    resize: vertical;
+    min-height: 150px;
+}
+
+/* 页脚 */
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 60px 0 30px;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+}
+
+.footer-logo {
+    flex: 1;
+}
+
+.footer-logo .logo-e {
+    width: 40px;
+    height: 40px;
+}
+
+.footer-logo h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.footer-logo p {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.footer-links {
+    flex: 1;
+}
+
+.footer-links h4 {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.footer-links ul {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 10px;
+}
+
+.footer-links a {
+    color: #ccc;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #ff7e5f;
+}
+
+.footer-legal {
+    flex: 1;
+}
+
+.footer-legal h4 {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.footer-legal ul {
+    list-style: none;
+}
+
+.footer-legal li {
+    margin-bottom: 10px;
+}
+
+.footer-legal a {
+    color: #ccc;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-legal a:hover {
+    color: #ff7e5f;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 30px;
+    border-top: 1px solid #444;
+    font-size: 14px;
+    color: #ccc;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    header .container {
+        flex-direction: column;
+        gap: 20px;
+        padding: 10px;
+    }
+
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .hero {
+        padding: 120px 0 80px;
+    }
+
+    .hero h2 {
+        font-size: 28px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        display: block;
+        margin: 10px auto;
+        text-align: center;
+    }
+
+    .about-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .about-features {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-info {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .contact-form .form-group {
+        flex-direction: column;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 40px;
+        text-align: center;
+    }
+
+    /* 聊天功能响应式 */
+    .chat-container {
+        flex-direction: column;
+        height: 500px;
+    }
+
+    .chat-sidebar {
+        width: 100%;
+        height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .chat-main {
+        flex: 1;
+    }
+
+    .chat-messages {
+        padding: 20px;
+    }
+
+    .message {
+        max-width: 85%;
+    }
+
+    .chat-input {
+        padding: 15px;
+    }
+
+    .chat-input textarea {
+        min-height: 60px;
+    }
+
+    /* 捐赠表单响应式 */
+    .amount-options {
+        justify-content: center;
+    }
+
+    .donate-type {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .payment-options {
+        justify-content: center;
+    }
+
+    /* 项目列表响应式 */
+    .project-list {
+        grid-template-columns: 1fr;
+    }
+
+    /* 分类按钮响应式 */
+    .project-categories {
+        flex-wrap: wrap;
+    }
+
+    .category-btn {
+        margin-bottom: 10px;
+    }
+
+    /* 受赠者列表响应式 */
+    .beneficiary-item {
+        flex-direction: column;
+    }
+
+    .beneficiary-image {
+        width: 100%;
+        height: 300px;
+    }
+
+    .beneficiary-info {
+        padding: 20px;
+    }
+
+    .donate-btn {
+        position: static;
+        margin-top: 20px;
+        display: inline-block;
+    }
+
+    /* 聊天模态框响应式 */
+    .chat-modal-content {
+        width: 95%;
+        height: 85%;
+    }
+
+    /* 登录/注册模态框响应式 */
+    .auth-modal-content {
+        padding: 20px;
+        width: 95%;
+    }
+
+    /* 受赠者详情响应式 */
+    .beneficiary-detail .container {
+        padding: 20px;
+    }
+
+    .beneficiary-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .beneficiary-contact-info {
+        margin-left: 0;
+    }
+
+    .beneficiary-detail-tabs {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .beneficiary-tab-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-out;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ff7e5f;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #feb47b;
+}

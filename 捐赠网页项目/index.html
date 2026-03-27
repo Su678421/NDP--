@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NDP - 新捐赠平台</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <div class="logo-e"></div>
+                <h1>NDP</h1>
+                <p>一款让善良之人放心的平台</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home">首页</a></li>
+                    <li><a href="#about">关于NDP</a></li>
+                    <li><a href="#donate">立即捐赠</a></li>
+                    <li><a href="#faq">常见问题</a></li>
+                    <li><a href="#contact">联系我们</a></li>
+                    <li id="user-area">
+                        <a href="#" onclick="event.preventDefault(); openAuthModal('login')" class="login-btn">登录/注册</a>
+                        <div id="user-info" style="display: none;">
+                            <div class="user-avatar-small"></div>
+                            <span id="user-name"></span>
+                            <div class="user-dropdown">
+                                <a href="#" onclick="event.preventDefault(); openUserProfile()">个人主页</a>
+                                <a href="#" onclick="event.preventDefault(); openAdminPanel()" id="admin-menu-item" style="display: none;">管理后台</a>
+                                <a href="#" onclick="event.preventDefault(); logout()">退出登录</a>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+    <section id="home" class="hero">
+        <div class="hero-hearts">
+            <div class="heart heart-1"></div>
+            <div class="heart heart-2"></div>
+            <div class="heart heart-3"></div>
+            <div class="heart heart-4"></div>
+            <div class="heart heart-5"></div>
+            <div class="heart heart-6"></div>
+            <div class="heart heart-7"></div>
+            <div class="heart heart-8"></div>
+            <div class="heart heart-9"></div>
+            <div class="heart heart-10"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h2>让爱心传递，让温暖延续</h2>
+                <p>直接连接捐赠者与受赠者，确保每一份爱心都能精准送达</p>
+                <a href="#donate" class="btn-primary">立即捐赠</a>
+                <a href="#about" class="btn-secondary">了解更多</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container">
+            <h2>关于NDP</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>NDP（New Donate Platform）</h3>
+                    <p>由于现在人们对于捐赠物品、财物的态度，许多人担心这些捐赠品到不了真正需要的人手中，而选择放弃捐赠。所以想设计一款捐赠者与受赠者之间可以直接交流的平台，确保真实性。</p>
+                    <p>我们致力于搭建一个透明、高效的捐赠桥梁，让爱心能够真正传递到需要帮助的人手中。通过直接交流机制，确保每一份捐赠都能被妥善使用，同时增强捐赠者的参与感和信任感。</p>
+                </div>
+                <div class="about-features">
+                    <div class="feature">
+                        <h4>直接交流</h4>
+                        <p>捐赠者与受赠者可直接沟通，确保信息透明</p>
+                    </div>
+                    <div class="feature">
+                        <h4>信息真实</h4>
+                        <p>受赠者需提供官方证明，确保信息真实性</p>
+                    </div>
+                    <div class="feature">
+                        <h4>多种捐赠</h4>
+                        <p>支持金钱和物品捐赠，满足不同需求</p>
+                    </div>
+                    <div class="feature">
+                        <h4>定期审查</h4>
+                        <p>定期审查受赠者信息，确保平台可信度</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="donate" class="donate">
+        <div class="container">
+            <h2>立即捐赠</h2>
+            <div class="beneficiary-list" id="beneficiary-list">
+                <p style="text-align: center; padding: 40px; color: #666;">暂无受赠者信息</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="faq">
+        <div class="container">
+            <h2>常见问题</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <h3 class="faq-question">如何确保受赠者信息的真实性？</h3>
+                    <div class="faq-answer">
+                        <p>受赠者必须提供官方证明以确保信息的真实性，我们会定期审查受赠者资料，确保平台信息的可信度。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <h3 class="faq-question">捐赠者与受赠者如何交流？</h3>
+                    <div class="faq-answer">
+                        <p>平台提供线上聊天功能，捐赠者与受赠者之间身份彼此保密，可进行安全的线上沟通。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <h3 class="faq-question">物品捐赠的邮费如何处理？</h3>
+                    <div class="faq-answer">
+                        <p>邮费由捐赠者与平台按照4：6的比例支付，减轻捐赠者的负担。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <h3 class="faq-question">如何申请开具捐赠发票和证书？</h3>
+                    <div class="faq-answer">
+                        <p>在捐赠时可选择是否需要开具发票和证书，我们会根据您的选择进行处理。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2>联系我们</h2>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <h3>邮箱</h3>
+                    <p>3973748283@qq.com</p>
+                </div>
+                <div class="contact-item">
+                    <h3>客服热线</h3>
+                    <p>400-123-4567</p>
+                </div>
+                <div class="contact-item">
+                    <h3>工作时间</h3>
+                    <p>周一至周五 9:00-18:00</p>
+                </div>
+            </div>
+            <form class="contact-form">
+                <h3>发送消息</h3>
+                <div class="form-group">
+                    <input type="text" placeholder="您的姓名">
+                    <input type="email" placeholder="您的邮箱">
+                </div>
+                <div class="form-group">
+                    <textarea placeholder="您的留言"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">发送</button>
+            </form>
+        </div>
+    </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="logo-e"></div>
+                    <h3>NDP</h3>
+                    <p>一款让善良之人放心的平台</p>
+                </div>
+                <div class="footer-links">
+                    <h4>快速链接</h4>
+                    <ul>
+                        <li><a href="#home">首页</a></li>
+                        <li><a href="#about">关于我们</a></li>
+                        <li><a href="#donate">立即捐赠</a></li>
+                        <li><a href="#faq">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-legal">
+                    <h4>法律条款</h4>
+                    <ul>
+                        <li><a href="privacy.html">隐私政策</a></li>
+                        <li><a href="terms.html">用户协议</a></li>
+                        <li><a href="#contact">联系我们</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 NDP 新捐赠平台. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
