@@ -6,17 +6,45 @@ console.log('NDP捐赠平台 - JavaScript已加载');
 let chatMessages = JSON.parse(localStorage.getItem('chatMessages')) || {};
 
 // 模拟用户数据库，存储所有注册用户的信息
-let userDatabase = JSON.parse(localStorage.getItem('userDatabase')) || {
-    '13800138000': { name: '张三', role: 'donor', password: '123456' },
-    '13900139000': { name: '李四', role: 'donor', password: '123456' },
-    '13700137000': { name: '王五', role: 'donor', password: '123456' }
-};
+let userDatabase = JSON.parse(localStorage.getItem('userDatabase')) || {};
 
 // 后端API地址
 const API_URL = '';
 
+// 清理默认测试数据
+function cleanTestData() {
+    // 清理userDatabase中的默认测试数据
+    const userDatabase = JSON.parse(localStorage.getItem('userDatabase') || '{}');
+    const testUsers = ['13800138000', '13900139000', '13700137000', '张三', '李四', '王五'];
+    
+    let hasChanges = false;
+    for (const key in userDatabase) {
+        if (testUsers.includes(key) || testUsers.includes(userDatabase[key].name)) {
+            delete userDatabase[key];
+            hasChanges = true;
+        }
+    }
+    
+    if (hasChanges) {
+        localStorage.setItem('userDatabase', JSON.stringify(userDatabase));
+        console.log('清理了默认测试数据');
+    }
+    
+    // 清理beneficiaries中的测试数据（如果有）
+    const beneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
+    const cleanedBeneficiaries = beneficiaries.filter(b => !testUsers.includes(b.username));
+    
+    if (cleanedBeneficiaries.length !== beneficiaries.length) {
+        localStorage.setItem('beneficiaries', JSON.stringify(cleanedBeneficiaries));
+        console.log('清理了受赠者中的测试数据');
+    }
+}
+
 // 页面加载完成后执行
 document.addEventListener('DOMContentLoaded', function() {
+    // 清理默认测试数据
+    cleanTestData();
+    
     // 初始化所有功能
     initTabSwitching();
     initFaqAccordion();
@@ -95,6 +123,17 @@ function initSmoothScroll() {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const targetId = this.getAttribute('href');
+            
+            // 避免使用无效的选择器
+            if (targetId === '#') {
+                // 滚动到页面顶部
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                return;
+            }
+            
             const targetElement = document.querySelector(targetId);
 
             if (targetElement) {
@@ -132,6 +171,21 @@ function initFormSubmission() {
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            const name = this.querySelector('input[type="text"]').value;
+            const email = this.querySelector('input[type="email"]').value;
+            const message = this.querySelector('textarea').value;
+            
+            // 保存消息到本地存储
+            const contactMessages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+            contactMessages.push({
+                id: Date.now().toString(),
+                name: name,
+                email: email,
+                message: message,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('contactMessages', JSON.stringify(contactMessages));
+            
             alert('您的消息已发送，我们会尽快回复您！');
             this.reset();
         });
@@ -459,6 +513,23 @@ function saveUserDatabase() {
     localStorage.setItem('userDatabase', JSON.stringify(userDatabase));
 }
 
+// 清除所有受赠者数据（用于测试）
+function clearBeneficiaries() {
+    localStorage.removeItem('beneficiaries');
+    // 同时清除userDatabase中的受赠者
+    const updatedUserDatabase = {};
+    for (const key in userDatabase) {
+        if (userDatabase[key].role !== 'beneficiary') {
+            updatedUserDatabase[key] = userDatabase[key];
+        }
+    }
+    userDatabase = updatedUserDatabase;
+    saveUserDatabase();
+    alert('受赠者数据已清除');
+    // 重新加载受赠者列表
+    loadBeneficiaries();
+}
+
 // 检查登录状态
 function checkLoginStatus() {
     const token = localStorage.getItem('token');
@@ -484,13 +555,22 @@ function updateNavbar() {
         }
         if (userAvatarElement) {
             // 检查用户是否有保存的头像
-            const savedAvatar = localStorage.getItem('userAvatar') || user.avatar;
+            const avatarKey = 'avatar_' + user.username;
+            const savedAvatar = localStorage.getItem(avatarKey);
             if (savedAvatar) {
                 userAvatarElement.style.backgroundImage = `url(${savedAvatar})`;
                 userAvatarElement.style.backgroundSize = 'cover';
                 userAvatarElement.style.backgroundPosition = 'center';
                 userAvatarElement.textContent = '';
             } else {
+                // 设置默认头像：橙色背景 + 白色首字母
+                userAvatarElement.style.backgroundImage = 'none';
+                userAvatarElement.style.backgroundColor = '#ff7e5f';
+                userAvatarElement.style.color = '#fff';
+                userAvatarElement.style.display = 'flex';
+                userAvatarElement.style.alignItems = 'center';
+                userAvatarElement.style.justifyContent = 'center';
+                userAvatarElement.style.fontWeight = 'bold';
                 userAvatarElement.textContent = user.username.charAt(0).toUpperCase();
             }
         }
@@ -573,7 +653,54 @@ async function login(username, password) {
         }
         throw new Error(data.message || '登录失败');
     } catch (error) {
-        throw new Error('手机号或密码错误');
+        // 模拟环境下从本地数据库验证
+        // 查找用户（支持手机号或用户名登录）
+        let userData = null;
+        let loginKey = null;
+        
+        // 检查是否是手机号登录
+        if (userDatabase[username]) {
+            userData = userDatabase[username];
+            loginKey = username;
+        } else {
+            // 检查是否是用户名登录
+            for (const key in userDatabase) {
+                if (userDatabase[key].name === username) {
+                    userData = userDatabase[key];
+                    loginKey = key;
+                    break;
+                }
+            }
+        }
+        
+        if (userData && userData.password === password) {
+            // 登录成功，创建用户对象
+            const user = {
+                _id: Date.now().toString(),
+                username: userData.name,
+                role: userData.role
+            };
+            
+            // 如果是受赠者，从beneficiaries中获取更多信息
+            if (userData.role === 'beneficiary') {
+                const beneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
+                const beneficiary = beneficiaries.find(b => b.username === userData.name);
+                if (beneficiary) {
+                    user.isVerified = beneficiary.isVerified;
+                    user.isReviewed = beneficiary.isReviewed;
+                    user.phone = beneficiary.phone;
+                    user.address = beneficiary.address;
+                    user.description = beneficiary.description;
+                    user.image = beneficiary.image;
+                }
+            }
+            
+            localStorage.setItem('token', 'mock-token-' + Date.now());
+            localStorage.setItem('user', JSON.stringify(user));
+            return user;
+        } else {
+            throw new Error('手机号或密码错误');
+        }
     }
 }
 
@@ -821,6 +948,7 @@ function openAdminPanel() {
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <button onclick="loadAllUsers()" style="padding: 10px 20px; background-color: #ff7e5f; color: #fff; border: none; border-radius: 5px; cursor: pointer;">用户列表</button>
                 <button onclick="loadPendingBeneficiaries()" style="padding: 10px 20px; background-color: #ff7e5f; color: #fff; border: none; border-radius: 5px; cursor: pointer;">待审核受赠者</button>
+                <button onclick="clearBeneficiaries()" style="padding: 10px 20px; background-color: #999; color: #fff; border: none; border-radius: 5px; cursor: pointer;">清除受赠者数据</button>
                 <button onclick="document.querySelector('.admin-modal').remove()" style="padding: 10px 20px; background-color: #666; color: #fff; border: none; border-radius: 5px; cursor: pointer; margin-left: auto;">关闭</button>
             </div>
             <div id="admin-content"></div>
@@ -830,14 +958,141 @@ function openAdminPanel() {
     document.body.appendChild(modal);
 }
 
+// 加载联系我们消息
+function loadContactMessages() {
+    const content = document.getElementById('admin-content');
+    const contactMessages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+    
+    if (contactMessages.length === 0) {
+        content.innerHTML = '<h3>联系我们消息 (0)</h3><p>暂无联系消息</p>';
+    } else {
+        content.innerHTML = '<h3>联系我们消息 (' + contactMessages.length + ')</h3>' +
+            '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">' +
+            '<tr style="background-color: #f9f9f9;">' +
+            '<th style="padding: 10px; border: 1px solid #ddd; text-align: left;">姓名</th>' +
+            '<th style="padding: 10px; border: 1px solid #ddd; text-align: left;">邮箱</th>' +
+            '<th style="padding: 10px; border: 1px solid #ddd; text-align: left;">消息</th>' +
+            '<th style="padding: 10px; border: 1px solid #ddd; text-align: left;">时间</th>' +
+            '<th style="padding: 10px; border: 1px solid #ddd; text-align: left;">操作</th>' +
+            '</tr>' +
+            contactMessages.map(function(msg) {
+                const date = new Date(msg.timestamp).toLocaleString('zh-CN');
+                return '<tr>' +
+                    '<td style="padding: 10px; border: 1px solid #ddd;">' + msg.name + '</td>' +
+                    '<td style="padding: 10px; border: 1px solid #ddd;">' + msg.email + '</td>' +
+                    '<td style="padding: 10px; border: 1px solid #ddd;">' + msg.message + '</td>' +
+                    '<td style="padding: 10px; border: 1px solid #ddd;">' + date + '</td>' +
+                    '<td style="padding: 10px; border: 1px solid #ddd;">' +
+                    '<button onclick="deleteContactMessage(\'' + msg.id + '\')" style="padding: 5px 10px; background-color: #f44336; color: #fff; border: none; border-radius: 3px; cursor: pointer;">删除</button>' +
+                    '</td>' +
+                    '</tr>';
+            }).join('') +
+            '</table>';
+    }
+}
+
+// 删除联系消息
+function deleteContactMessage(messageId) {
+    if (confirm('确定要删除这条消息吗？')) {
+        const contactMessages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
+        const updatedMessages = contactMessages.filter(msg => msg.id !== messageId);
+        localStorage.setItem('contactMessages', JSON.stringify(updatedMessages));
+        loadContactMessages();
+    }
+}
+
 // 加载所有用户
 async function loadAllUsers() {
-    const token = localStorage.getItem('token');
-    const response = await fetch(API_URL + '/api/admin/users', {
-        headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const users = await response.json();
+    let apiUsers = [];
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(API_URL + '/api/admin/users', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        apiUsers = await response.json();
+        console.log('API返回的用户:', apiUsers);
+    } catch (error) {
+        console.log('API加载失败，使用本地数据');
+    }
     
+    // 从本地存储加载受赠者数据
+    const localBeneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
+    console.log('本地受赠者数据:', localBeneficiaries);
+    
+    // 从localStorage重新加载userDatabase，确保获取最新数据
+    const latestUserDatabase = JSON.parse(localStorage.getItem('userDatabase') || '{}');
+    console.log('本地用户数据库:', latestUserDatabase);
+    
+    // 从最新的userDatabase加载所有用户数据
+    // 只加载实际注册的用户，排除默认测试数据
+    const usersFromDatabase = Object.values(latestUserDatabase)
+        .filter(d => d.name && d.password) // 确保有用户名和密码
+        .map(d => ({
+            _id: d.id || Date.now().toString() + Math.random(),
+            username: d.name,
+            role: d.role,
+            isVerified: d.role === 'donor' ? true : false
+        }));
+    console.log('从数据库加载的用户:', usersFromDatabase);
+    
+    // 从localStorage加载当前登录用户
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+    console.log('当前登录用户:', currentUser);
+    
+    // 合并所有用户
+    let allUsers = [...apiUsers, ...usersFromDatabase];
+    
+    // 确保受赠者信息完整
+    localBeneficiaries.forEach(b => {
+        console.log('处理受赠者:', b.username);
+        // 查找是否已经在用户列表中
+        const existingUser = allUsers.find(u => u.username === b.username);
+        if (existingUser) {
+            // 更新现有用户的信息
+            console.log('更新现有用户:', existingUser.username);
+            existingUser.isVerified = b.isVerified;
+            existingUser.isReviewed = b.isReviewed;
+        } else {
+            // 添加新受赠者
+            console.log('添加新受赠者:', b.username);
+            allUsers.push({
+                _id: b._id || Date.now().toString() + Math.random(),
+                username: b.username,
+                role: 'beneficiary',
+                isVerified: b.isVerified,
+                isReviewed: b.isReviewed
+            });
+        }
+    });
+    
+    // 添加当前登录用户（如果不在列表中）
+    if (currentUser && !allUsers.some(u => u.username === currentUser.username)) {
+        console.log('添加当前登录用户:', currentUser.username);
+        allUsers.push({
+            _id: currentUser._id,
+            username: currentUser.username,
+            role: currentUser.role,
+            isVerified: currentUser.isVerified || true,
+            isAdmin: currentUser.isAdmin
+        });
+    }
+    
+    // 去重，避免重复用户
+    const uniqueUsers = [];
+    const seenUsernames = new Set();
+    allUsers.forEach(user => {
+        if (!seenUsernames.has(user.username)) {
+            seenUsernames.add(user.username);
+            uniqueUsers.push(user);
+        }
+    });
+    console.log('最终用户列表:', uniqueUsers);
+    
+    displayUsers(uniqueUsers);
+}
+
+// 显示用户列表
+function displayUsers(users) {
     const content = document.getElementById('admin-content');
     content.innerHTML = '<h3>所有用户 (' + users.length + ')</h3>' +
         '<table style="width: 100%; border-collapse: collapse;">' +
@@ -848,14 +1103,14 @@ async function loadAllUsers() {
         '<th style="padding: 10px; border: 1px solid #ddd; text-align: left;">操作</th>' +
         '</tr>' +
         users.map(function(u) {
-            var roleText = u.role === 'admin' ? '管理员' : u.role === 'donor' ? '捐赠者' : '受赠者';
-            var statusText = u.isVerified ? '已认证' : '未认证';
+            var roleText = u.isAdmin ? '管理员' : u.role === 'donor' ? '捐赠者' : '受赠者';
+            var statusText = u.role === 'beneficiary' ? (u.isVerified ? '已认证' : (u.isReviewed ? '未通过' : '审核中')) : '已认证';
             var buttons = '';
-            if (u.role === 'beneficiary' && !u.isVerified) {
-                buttons = '<button onclick="verifyBeneficiary(\'' + u._id + '\', true)" style="padding: 5px 10px; background-color: #4CAF50; color: #fff; border: none; border-radius: 3px; cursor: pointer; margin-right: 5px;">通过</button>' +
-                    '<button onclick="verifyBeneficiary(\'' + u._id + '\', false)" style="padding: 5px 10px; background-color: #f44336; color: #fff; border: none; border-radius: 3px; cursor: pointer;">拒绝</button>';
+            if (u.role === 'beneficiary' && !u.isReviewed) {
+                buttons = '<button onclick="verifyBeneficiary(\'' + u.username + '\', true)" style="padding: 5px 10px; background-color: #4CAF50; color: #fff; border: none; border-radius: 3px; cursor: pointer; margin-right: 5px;">通过</button>' +
+                    '<button onclick="verifyBeneficiary(\'' + u.username + '\', false)" style="padding: 5px 10px; background-color: #f44336; color: #fff; border: none; border-radius: 3px; cursor: pointer;">拒绝</button>';
             }
-            buttons += '<button onclick="deleteUser(\'' + u._id + '\')" style="padding: 5px 10px; background-color: #666; color: #fff; border: none; border-radius: 3px; cursor: pointer;">删除</button>';
+            buttons += '<button onclick="deleteUser(\'' + u.username + '\')" style="padding: 5px 10px; background-color: #666; color: #fff; border: none; border-radius: 3px; cursor: pointer;">删除</button>';
             return '<tr>' +
                 '<td style="padding: 10px; border: 1px solid #ddd;">' + u.username + '</td>' +
                 '<td style="padding: 10px; border: 1px solid #ddd;">' + roleText + '</td>' +
@@ -868,41 +1123,61 @@ async function loadAllUsers() {
 
 // 加载待审核受赠者
 async function loadPendingBeneficiaries() {
-    const token = localStorage.getItem('token');
-    const response = await fetch(API_URL + '/api/admin/pending-beneficiaries', {
-        headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const beneficiaries = await response.json();
+    // 从本地存储加载待审核的受赠者
+    const localBeneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
+    const pendingBeneficiaries = localBeneficiaries.filter(b => !b.isReviewed);
     
     const content = document.getElementById('admin-content');
-    if (beneficiaries.length === 0) {
+    if (pendingBeneficiaries.length === 0) {
         content.innerHTML = '<h3>待审核受赠者 (0)</h3><p>没有待审核的受赠者</p>';
     } else {
-        content.innerHTML = '<h3>待审核受赠者 (' + beneficiaries.length + ')</h3>' +
-            beneficiaries.map(function(u) {
+        content.innerHTML = '<h3>待审核受赠者 (' + pendingBeneficiaries.length + ')</h3>' +
+            pendingBeneficiaries.map(function(u) {
                 return '<div style="padding: 15px; border: 1px solid #ddd; margin-bottom: 10px; border-radius: 5px;">' +
                     '<p><strong>用户名：</strong>' + u.username + '</p>' +
                     '<p><strong>手机号：</strong>' + (u.phone || '未填写') + '</p>' +
                     '<p><strong>地址：</strong>' + (u.address || '未填写') + '</p>' +
                     '<p><strong>描述：</strong>' + (u.description || '未填写') + '</p>' +
-                    '<button onclick="verifyBeneficiary(\'' + u._id + '\', true)" style="padding: 8px 16px; background-color: #4CAF50; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">通过审核</button>' +
-                    '<button onclick="verifyBeneficiary(\'' + u._id + '\', false)" style="padding: 8px 16px; background-color: #f44336; color: #fff; border: none; border-radius: 4px; cursor: pointer;">拒绝</button>' +
+                    '<button onclick="verifyBeneficiary(\'' + u.username + '\', true)" style="padding: 8px 16px; background-color: #4CAF50; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">通过审核</button>' +
+                    '<button onclick="verifyBeneficiary(\'' + u.username + '\', false)" style="padding: 8px 16px; background-color: #f44336; color: #fff; border: none; border-radius: 4px; cursor: pointer;">拒绝</button>' +
                     '</div>';
             }).join('');
     }
 }
 
 // 审核受赠者
-async function verifyBeneficiary(userId, verified) {
-    const token = localStorage.getItem('token');
-    await fetch(API_URL + '/api/admin/verify-beneficiary/' + userId, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ verified: verified })
+async function verifyBeneficiary(username, verified) {
+    // 更新本地存储中的受赠者审核状态
+    const localBeneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
+    const updatedBeneficiaries = localBeneficiaries.map(b => {
+        if (b.username === username) {
+            return { ...b, isVerified: verified, isReviewed: true };
+        }
+        return b;
     });
+    localStorage.setItem('beneficiaries', JSON.stringify(updatedBeneficiaries));
+    
+    // 发送审核结果消息给受赠者
+    const chatMessages = JSON.parse(localStorage.getItem('chatMessages') || '{}');
+    const adminUser = JSON.parse(localStorage.getItem('user'));
+    const messageKey = `admin_${username}`;
+    
+    if (!chatMessages[messageKey]) {
+        chatMessages[messageKey] = [];
+    }
+    
+    const messageContent = verified 
+        ? '您的受赠者申请已通过审核，现在可以接受捐赠了！' 
+        : '您的受赠者申请未通过审核，如有疑问请重新注册申请。';
+    
+    chatMessages[messageKey].push({
+        sender: 'admin',
+        message: messageContent,
+        timestamp: new Date().toISOString()
+    });
+    
+    localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
+    
     alert(verified ? '已通过审核' : '已拒绝');
     loadPendingBeneficiaries();
 }
@@ -910,11 +1185,36 @@ async function verifyBeneficiary(userId, verified) {
 // 删除用户
 async function deleteUser(userId) {
     if (!confirm('确定要删除这个用户吗？')) return;
-    const token = localStorage.getItem('token');
-    await fetch(API_URL + '/api/admin/users/' + userId, {
-        method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + token }
-    });
+    
+    try {
+        const token = localStorage.getItem('token');
+        await fetch(API_URL + '/api/admin/users/' + userId, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+    } catch (error) {
+        console.log('API删除失败，从本地存储删除用户');
+        
+        // 从本地存储中删除用户
+        // 1. 从userDatabase中删除
+        const userDatabase = JSON.parse(localStorage.getItem('userDatabase') || '{}');
+        const updatedDatabase = Object.entries(userDatabase)
+            .filter(([key, user]) => {
+                // 查找所有用户，看是否有匹配的id或用户名
+                return user.id !== userId && user.name !== userId;
+            })
+            .reduce((acc, [key, user]) => {
+                acc[key] = user;
+                return acc;
+            }, {});
+        localStorage.setItem('userDatabase', JSON.stringify(updatedDatabase));
+        
+        // 2. 从beneficiaries中删除
+        const beneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
+        const updatedBeneficiaries = beneficiaries.filter(b => b._id !== userId && b.username !== userId);
+        localStorage.setItem('beneficiaries', JSON.stringify(updatedBeneficiaries));
+    }
+    
     alert('用户已删除');
     loadAllUsers();
 }
@@ -1152,7 +1452,32 @@ async function handleDonorRegister(form) {
             alert(data.message || '注册失败');
         }
     } catch (error) {
-        alert('注册失败，请稍后重试');
+        // 模拟注册成功
+        // 保存用户信息到数据库
+        userDatabase[phoneNumber] = {
+            name: username,
+            role: 'donor',
+            password: password
+        };
+        
+        // 保存数据库
+        saveUserDatabase();
+        
+        const mockUser = {
+            _id: Date.now().toString(),
+            username: username,
+            role: 'donor'
+        };
+        localStorage.setItem('token', 'mock-token-' + Date.now());
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        
+        // 确保新用户使用默认头像，清除可能存在的旧头像
+        const avatarKey = 'avatar_' + username;
+        localStorage.removeItem(avatarKey);
+        
+        alert('注册成功！');
+        form.closest('.auth-modal').remove();
+        updateNavbar();
     }
 }
 
@@ -1178,39 +1503,155 @@ async function handleBeneficiaryRegister(form) {
         });
     }
     
-    // 保存到本地存储（模拟）
-    const beneficiaryData = {
-        username: username,
-        phone: phoneNumber,
-        idCard: idCard,
-        address: address,
-        description: description,
-        image: imageData,
-        role: 'beneficiary',
-        registeredAt: new Date().toISOString()
-    };
-    
-    // 保存到本地存储
-    const beneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
-    beneficiaries.push(beneficiaryData);
-    localStorage.setItem('beneficiaries', JSON.stringify(beneficiaries));
-    
-    // 创建模拟用户
-    const mockUser = {
-        _id: Date.now().toString(),
-        username: username,
-        role: 'beneficiary',
-        phone: phoneNumber,
-        address: address,
-        description: description,
-        image: imageData
-    };
-    localStorage.setItem('token', 'mock-token-' + Date.now());
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    
-    alert('注册成功！您的信息已提交审核，审核通过后即可成为受赠者用户。');
-    form.closest('.auth-modal').remove();
-    updateNavbar();
+    try {
+        // 尝试调用后端API注册受赠者
+        const response = await fetch(API_URL + '/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username: username, 
+                password: password, 
+                role: 'beneficiary', 
+                phone: phoneNumber,
+                idCard: idCard,
+                address: address,
+                description: description,
+                image: imageData
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            
+            // 保存到本地存储作为备份
+            const beneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
+            beneficiaries.push(data.user);
+            localStorage.setItem('beneficiaries', JSON.stringify(beneficiaries));
+            
+            // 保存受赠者信息到userDatabase，确保可以登录
+            userDatabase[phoneNumber] = {
+                name: username,
+                role: 'beneficiary',
+                password: password
+            };
+            
+            userDatabase[username] = {
+                name: username,
+                role: 'beneficiary',
+                password: password
+            };
+            
+            saveUserDatabase();
+            
+            // 确保新用户使用默认头像
+            const avatarKey = 'avatar_' + username;
+            localStorage.removeItem(avatarKey);
+            
+            // 发送审核中状态的消息给受赠者
+            const chatMessages = JSON.parse(localStorage.getItem('chatMessages') || '{}');
+            const messageKey = `admin_${username}`;
+            
+            if (!chatMessages[messageKey]) {
+                chatMessages[messageKey] = [];
+            }
+            
+            chatMessages[messageKey].push({
+                sender: 'admin',
+                message: '您的受赠者身份正在审核中，请耐心等待。',
+                timestamp: new Date().toISOString()
+            });
+            
+            localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
+            
+            alert('注册成功！您的信息已提交审核，审核通过后即可成为受赠者用户。');
+            form.closest('.auth-modal').remove();
+            updateNavbar();
+        } else {
+            alert(data.message || '注册失败');
+        }
+    } catch (error) {
+        console.log('API注册失败，使用本地存储');
+        
+        // 保存到本地存储（模拟）
+        const beneficiaryData = {
+            _id: Date.now().toString(),
+            username: username,
+            phone: phoneNumber,
+            idCard: idCard,
+            address: address,
+            description: description,
+            image: imageData,
+            role: 'beneficiary',
+            isVerified: false,
+            isReviewed: false,
+            registeredAt: new Date().toISOString()
+        };
+        
+        // 保存到本地存储
+        const beneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
+        beneficiaries.push(beneficiaryData);
+        localStorage.setItem('beneficiaries', JSON.stringify(beneficiaries));
+        
+        // 保存受赠者信息到userDatabase，确保可以登录
+        // 使用手机号作为键
+        userDatabase[phoneNumber] = {
+            name: username,
+            role: 'beneficiary',
+            password: password
+        };
+        
+        // 同时使用用户名作为键，方便通过用户名登录
+        userDatabase[username] = {
+            name: username,
+            role: 'beneficiary',
+            password: password
+        };
+        
+        // 保存数据库
+        saveUserDatabase();
+        
+        // 创建模拟用户
+        const mockUser = {
+            _id: Date.now().toString(),
+            username: username,
+            role: 'beneficiary',
+            isVerified: false,
+            isReviewed: false,
+            phone: phoneNumber,
+            address: address,
+            description: description,
+            image: imageData
+        };
+        localStorage.setItem('token', 'mock-token-' + Date.now());
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        
+        // 确保新用户使用默认头像，清除可能存在的旧头像
+        const avatarKey = 'avatar_' + username;
+        localStorage.removeItem(avatarKey);
+        
+        // 发送审核中状态的消息给受赠者
+        const chatMessages = JSON.parse(localStorage.getItem('chatMessages') || '{}');
+        const messageKey = `admin_${username}`;
+        
+        if (!chatMessages[messageKey]) {
+            chatMessages[messageKey] = [];
+        }
+        
+        chatMessages[messageKey].push({
+            sender: 'admin',
+            message: '您的受赠者身份正在审核中，请耐心等待。',
+            timestamp: new Date().toISOString()
+        });
+        
+        localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
+        
+        alert('注册成功！您的信息已提交审核，审核通过后即可成为受赠者用户。');
+        form.closest('.auth-modal').remove();
+        updateNavbar();
+    }
 }
 
 // 打开用户个人资料
@@ -1269,7 +1710,7 @@ function openUserProfile() {
                     text-align: center;
                     margin-bottom: 20px;
                 ">
-                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
                     <label for="avatar-upload" style="
                         cursor: pointer;
                         color: #ff7e5f;
@@ -1296,11 +1737,11 @@ function openUserProfile() {
                     </div>
                     <div class="form-group">
                         <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 13px; font-family: 'Microsoft YaHei', Arial, sans-serif;">角色</label>
-                        <input type="text" value="${user.role === 'donor' ? '捐赠者' : '受赠者'}" readonly style="width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9; font-family: 'Microsoft YaHei', Arial, sans-serif; font-size: 14px; color: #666;">
+                        <input type="text" value="${user.isAdmin ? '管理员' : user.role === 'donor' ? '捐赠者' : '受赠者'}" readonly style="width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9; font-family: 'Microsoft YaHei', Arial, sans-serif; font-size: 14px; color: #666;">
                     </div>
                     <div class="form-group">
-                        <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 13px; font-family: 'Microsoft YaHei', Arial, sans-serif;">捐赠记录</label>
-                        <button onclick="openDonationHistory()" style="
+                        <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 13px; font-family: 'Microsoft YaHei', Arial, sans-serif;">${user.role === 'beneficiary' ? '受赠记录' : '捐赠记录'}</label>
+                        <button onclick="${user.role === 'beneficiary' ? 'openBenefitHistory()' : 'openDonationHistory()'}" style="
                             padding: 7px 14px;
                             background-color: #f9f9f9;
                             border: 1px solid #ddd;
@@ -1309,7 +1750,7 @@ function openUserProfile() {
                             font-family: 'Microsoft YaHei', Arial, sans-serif;
                             font-size: 13px;
                             color: #333;
-                        ">查看捐赠记录</button>
+                        ">查看${user.role === 'beneficiary' ? '受赠' : '捐赠'}记录</button>
                     </div>
                     <div class="form-group" style="margin-top: 15px;">
                         <button onclick="deleteAccount()" style="
@@ -1342,7 +1783,8 @@ function openUserProfile() {
     document.body.appendChild(modal);
     
     // 加载已保存的头像
-    const savedAvatar = localStorage.getItem('userAvatar') || (user.avatar);
+    const avatarKey = 'avatar_' + user.username;
+    const savedAvatar = localStorage.getItem(avatarKey);
     if (savedAvatar) {
         setTimeout(() => {
             const avatarCircle = document.getElementById('profile-avatar-circle');
@@ -1353,6 +1795,23 @@ function openUserProfile() {
                 avatarCircle.textContent = '';
             }
         }, 100);
+    } else {
+        // 确保显示默认头像
+        setTimeout(() => {
+            const avatarCircle = document.getElementById('profile-avatar-circle');
+            if (avatarCircle) {
+                avatarCircle.style.backgroundImage = 'none';
+                avatarCircle.style.backgroundColor = '#ff7e5f';
+                avatarCircle.style.color = '#fff';
+                avatarCircle.textContent = user.username.charAt(0).toUpperCase();
+            }
+        }, 100);
+    }
+    
+    // 绑定头像上传事件
+    const avatarUpload = document.getElementById('avatar-upload');
+    if (avatarUpload) {
+        avatarUpload.addEventListener('change', handleAvatarUpload);
     }
     
     // 点击模态框外部关闭
@@ -1369,8 +1828,19 @@ function handleNicknameChange() {
     const newNickname = nicknameInput.value.trim();
     if (newNickname) {
         const user = JSON.parse(localStorage.getItem('user'));
+        const oldUsername = user.username;
         user.username = newNickname;
         localStorage.setItem('user', JSON.stringify(user));
+        
+        // 如果用户有头像，将头像从旧用户名键转移到新用户名键
+        const oldAvatarKey = 'avatar_' + oldUsername;
+        const newAvatarKey = 'avatar_' + newNickname;
+        const avatarData = localStorage.getItem(oldAvatarKey);
+        if (avatarData) {
+            localStorage.setItem(newAvatarKey, avatarData);
+            localStorage.removeItem(oldAvatarKey);
+        }
+        
         updateNavbar();
         alert('昵称修改成功！');
     }
@@ -1383,10 +1853,14 @@ function handleAvatarUpload(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const avatarData = e.target.result;
-            localStorage.setItem('userAvatar', avatarData);
-            
             const user = JSON.parse(localStorage.getItem('user'));
-            user.avatar = avatarData;
+            
+            // 使用用户名作为头像存储的键，确保每个用户有独立的头像
+            const avatarKey = 'avatar_' + user.username;
+            localStorage.setItem(avatarKey, avatarData);
+            
+            // 从user对象中移除avatar属性，避免localStorage存储限制问题
+            delete user.avatar;
             localStorage.setItem('user', JSON.stringify(user));
             
             updateUserProfileAvatar(avatarData);
@@ -1417,6 +1891,134 @@ function updateNavbarAvatar(avatarData) {
         userAvatarElement.style.backgroundPosition = 'center';
         userAvatarElement.textContent = '';
     }
+}
+
+// 打开消息中心
+function openMessageCenter() {
+    if (!checkLoginStatus()) {
+        alert('请先登录');
+        return;
+    }
+    
+    const user = JSON.parse(localStorage.getItem('user'));
+    const modal = document.createElement('div');
+    modal.className = 'message-center-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    modal.innerHTML = `
+        <div class="message-center-content" style="
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+            position: relative;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            color: #333;
+        ">
+            <h3 style="text-align: center; margin-bottom: 25px; color: #ff7e5f; font-size: 18px; font-weight: 600;">消息中心</h3>
+            <div id="message-list" style="margin-bottom: 20px;">
+                ${loadUserMessages()}
+            </div>
+            <button onclick="this.closest('.message-center-modal').remove()" style="
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: none;
+                border: none;
+                font-size: 18px;
+                cursor: pointer;
+                color: #666;
+                font-family: 'Microsoft YaHei', Arial, sans-serif;
+            ">&times;</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // 点击模态框外部关闭
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// 加载用户消息
+function loadUserMessages() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const messages = JSON.parse(localStorage.getItem('chatMessages') || '{}');
+    let messageHtml = '';
+    const processedUsers = new Set();
+    
+    // 查找与当前用户相关的消息
+    for (const [key, msgList] of Object.entries(messages)) {
+        if (key.includes(user.username)) {
+            const otherUser = key.split('_').find(name => name !== user.username);
+            if (otherUser && !processedUsers.has(otherUser)) {
+                // 标记该用户已处理
+                processedUsers.add(otherUser);
+                
+                // 获取与该用户相关的所有消息
+                let allMessages = [];
+                // 检查两种可能的键格式
+                const key1 = `${user.username}_${otherUser}`;
+                const key2 = `${otherUser}_${user.username}`;
+                
+                if (messages[key1]) {
+                    allMessages = allMessages.concat(messages[key1]);
+                }
+                if (messages[key2]) {
+                    allMessages = allMessages.concat(messages[key2]);
+                }
+                
+                // 按时间排序
+                allMessages.sort((a, b) => {
+                    return new Date(a.time) - new Date(b.time);
+                });
+                
+                messageHtml += `
+                    <div style="border-bottom: 1px solid #eee; padding: 15px 0;">
+                        <h4 style="margin-bottom: 10px; color: #333;">与 ${otherUser} 的对话</h4>
+                        <div style="background-color: #f9f9f9; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                            ${allMessages.slice(-3).map(msg => `
+                                <p style="margin: 5px 0; ${msg.sender === user.username ? 'text-align: right; color: #ff7e5f;' : 'text-align: left; color: #333;'}">
+                                    ${msg.message}
+                                </p>
+                            `).join('')}
+                        </div>
+                        <button onclick="openChat('${otherUser}', '${otherUser}')" style="
+                            padding: 6px 12px;
+                            background-color: #4CAF50;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 12px;
+                        ">继续聊天</button>
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    if (!messageHtml) {
+        messageHtml = '<p style="text-align: center; color: #666; padding: 40px 0;">暂无消息</p>';
+    }
+    
+    return messageHtml;
 }
 
 // 打开捐赠记录
@@ -1504,6 +2106,91 @@ async function openDonationHistory() {
     });
 }
 
+// 打开受赠记录
+async function openBenefitHistory() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('请先登录');
+        return;
+    }
+    
+    let benefits = [];
+    try {
+        const response = await fetch(API_URL + '/api/auth/my-benefits', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        benefits = await response.json();
+    } catch (error) {
+        console.error('获取受赠记录失败:', error);
+    }
+    
+    const modal = document.createElement('div');
+    modal.className = 'benefit-history-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    const benefitItems = benefits.length === 0 ? '<p style="text-align: center; padding: 30px; color: #666;">暂无受赠记录</p>' : 
+        benefits.map(function(b) {
+            const date = new Date(b.createdAt).toLocaleString('zh-CN');
+            const amount = b.type === 'money' ? '¥' + b.amount : b.goods;
+            const typeText = b.type === 'money' ? '金钱捐赠' : '物品捐赠';
+            return '<div class="benefit-item" style="padding: 15px; border-bottom: 1px solid #ddd; margin-bottom: 12px;">' +
+                '<div style="display: flex; justify-content: space-between; margin-bottom: 8px;">' +
+                '<h4 style="font-size: 14px; font-weight: 500; font-family: \'Microsoft YaHei\', Arial, sans-serif;">来自 ' + (b.donor ? b.donor.username : '未知') + ' 的 ' + typeText + '</h4>' +
+                '<span style="color: #ff7e5f; font-weight: bold; font-size: 14px; font-family: \'Microsoft YaHei\', Arial, sans-serif;">' + amount + '</span>' +
+                '</div>' +
+                '<p style="color: #666; font-size: 13px; font-family: \'Microsoft YaHei\', Arial, sans-serif;">' + date + '</p>' +
+                '</div>';
+        }).join('');
+    
+    modal.innerHTML = `
+        <div class="benefit-history-content" style="
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+            position: relative;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            color: #333;
+        ">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #ff7e5f; font-size: 18px; font-weight: 600; font-family: 'Microsoft YaHei', Arial, sans-serif;">受赠记录</h3>
+            <div class="benefit-history-list" style="max-height: 350px; overflow-y: auto;">
+                ${benefitItems}
+            </div>
+            <button onclick="this.closest('.benefit-history-modal').remove()" style="
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: none;
+                border: none;
+                font-size: 18px;
+                cursor: pointer;
+                color: #666;
+                font-family: 'Microsoft YaHei', Arial, sans-serif;
+            ">&times;</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
 // 加载受赠者列表
 async function loadBeneficiaries() {
     let beneficiaries = [];
@@ -1522,20 +2209,19 @@ async function loadBeneficiaries() {
     // 加载本地存储的受赠者数据
     const localBeneficiaries = JSON.parse(localStorage.getItem('beneficiaries') || '[]');
     if (localBeneficiaries.length > 0) {
-        beneficiaries = beneficiaries.concat(localBeneficiaries);
-    }
-    
-    // 如果没有数据，显示默认模拟数据
-    if (beneficiaries.length === 0) {
-        beneficiaries = [
-            { _id: '1', username: '李小明', description: '学费、生活费', phone: '13812345678', address: '贵州省毕节市' },
-            { _id: '2', username: '王奶奶', description: '医疗费用', phone: '13912345678', address: '河南省周口市' },
-            { _id: '3', username: '张大山', description: '生活补贴', phone: '13712345678', address: '云南省昭通市' }
-        ];
+        // 只添加已通过审核的受赠者
+        const verifiedBeneficiaries = localBeneficiaries.filter(b => b.isVerified === true);
+        beneficiaries = beneficiaries.concat(verifiedBeneficiaries);
     }
     
     const container = document.getElementById('beneficiary-list');
     if (!container) return;
+    
+    // 如果没有数据，显示默认提示
+    if (beneficiaries.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">暂无受赠者信息</p>';
+        return;
+    }
     
     container.innerHTML = beneficiaries.map(function(b) {
         // 如果有自定义图片则使用，否则使用默认图片
@@ -1575,7 +2261,16 @@ function openBeneficiaryDetailByData(beneficiary) {
         <div class="container">
             <div class="beneficiary-header">
                 <div class="beneficiary-account">
-                    <h3>${data.name}</h3>
+                    <h3>${data.name} <button onclick="event.preventDefault(); openChat('${beneficiary._id}', '${data.name}')" style="
+                        margin-left: 10px;
+                        padding: 5px 12px;
+                        background-color: #4CAF50;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 12px;
+                    ">发消息</button></h3>
                     <p>需要援助：${data.need}</p>
                 </div>
             </div>
@@ -1925,6 +2620,17 @@ function openChat(account, name) {
     const currentUser = JSON.parse(localStorage.getItem('user')).username;
     const chatKey = `${currentUser}_${account}`;
     
+    // 检查是否已经有打开的聊天窗口
+    const existingModal = document.querySelector(`.chat-modal[data-chat-with="${account}"]`);
+    if (existingModal) {
+        // 如果已经有打开的聊天窗口，聚焦到该窗口
+        existingModal.style.zIndex = '10001';
+        setTimeout(() => {
+            existingModal.style.zIndex = '10000';
+        }, 100);
+        return;
+    }
+    
     // 确保聊天记录存在
     if (!chatMessages[chatKey]) {
         chatMessages[chatKey] = [
@@ -1941,6 +2647,7 @@ function openChat(account, name) {
     // 创建聊天模态框
     const chatModal = document.createElement('div');
     chatModal.className = 'chat-modal';
+    chatModal.setAttribute('data-chat-with', account);
     chatModal.style.cssText = `
         position: fixed;
         top: 0;
